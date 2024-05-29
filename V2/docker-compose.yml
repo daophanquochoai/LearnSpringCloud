@@ -1,0 +1,56 @@
+version : "3.7"
+
+services:
+  currency-exchange-service:
+    image: quochoai/mmv2-curremcy-exchange-service-8000:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8000:8000"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE : http://naming-service:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+  currency-conversion-service:
+    image: quochoai/mmv2-currence-conversion-service:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-service:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+  api-gateway:
+    image: docker.io/quochoai/mmv2-api-gateway:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-service:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkin-server:9411/
+  naming-service :
+    image: doctorhoai/quochoai/mmv2-naming-server:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network
+  zipkin-server:
+    image: openzipkin/zipkin-slim
+    mem_limit: 300m
+    ports:
+      - "9411:9411"
+    networks:
+       -  currency-network
+networks:
+  currency-network:
+
